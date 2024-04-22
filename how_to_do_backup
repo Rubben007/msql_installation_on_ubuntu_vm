@@ -1,0 +1,29 @@
+HOW TO DO BACKUP ON MYSQL USING MYSQLDUMP
+
+STEPS TO DO THE BACKUP:
+
+1. Log into the server where MYSQL is running and log into MYSQL server with your user_id using this command = "sudo mysql -u username -p" provide your password and ENTER.
+
+2. You can confirm your databases by running this sql command = "SHOW DATABASES;" and this will show you all the databases currently present in the server and then you can log out of mysql by typing = exit; to come out of mysql back to the server.
+
+3. let say you want to backup a particular database, let's call that database MYDATABASE, you will then run this command = "sudo mysqldump -u username -p MYDATABASE > MYDATABASE_backup" this command will prompt you for your mysql user password and once you enter it boom the back will start and the time taken will depend on the volume of data in that database.
+
+4. After the backup is completed, mysql don't normally throw a success message but if something had gone wrong during the process, it will flag and error else it will backup succesfully and will not throw any success message.
+
+5. To check if the backup was successful, in the current server, you can run this command = "ls -lh" to see the folders in the server and you will see the folder MYDATABASE_backup and to further confirm if there is backup in that folder, you can open the folder with a text editor like nana or vi or simply cat the folder to see it's content.
+
+STEPS TO RESTORE THE BACKUP:
+
+Now lets say something happened and we lost this database and we need to restore this database.
+
+1. first we log into mysql in the server where mysql is running using this command = "sudo mysql -u username -p" provide our password and ENTER.
+
+2. Since we have lost the MYDATABASE database in mysql server, we will then have to either create it or create a new one in mysql server using the command = "CREATE DATABASE 'mydatabase'" we could call this new database we are creating in mysql server any name base on the business rquirment or just call it the original name used before. Note: this new database will be empty.
+
+3. So after creating the databbase on mysql server, we then exit mysql server back to the server where mysql is running.
+
+4. so to restore the data back to the new empty database from our backup file, we then run this command = "sudo mysqldump -u root -p mydatabase < MYDATABASE_backup" this will again prompt us for our password and once we enter it boom the backup restoration will begin and the time taken will depend on the volume of data in the backup file.
+
+5. To confirm if the restoration was successful, we then log back in to mysql server and check the database and it tabels 
+
+I HOPE THIS HELPS.

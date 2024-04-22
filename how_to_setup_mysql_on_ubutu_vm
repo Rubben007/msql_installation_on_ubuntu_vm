@@ -1,0 +1,62 @@
+HOW TO SET UP MYSQL SERVER ON AN UBUNTU VM AND CONNECT TO IT USING MYSQL WORKBENCH RUNNING ON A LOCAL MACHINE SAY WINDOWS MACHINE
+
+1. first connect to your VM and update the VM by running this command = "sudo apt update"
+2. then, install MySQL on the VM by running this command = "sudo apt install mysql-server"
+3. once the installation is complete, you can run this command = "sudo systemctl start mysql" to start mysql or "sudo systemctl enable mysql" to ensure mysql start running once the system is boot up.
+4. then you secure the MySQL installation by running this command = "sudo mysql_secure_installation" and follow the prompt
+5. After that, you can verify that MySQL is running by running this command = "sudo systemctl staus mysql"
+
+SETTING UP THE ROOT USER AND REMOTE USER:
+
+Root user:
+The root user is the most powerful in MySQL with full administrative privileges.
+The root user has access to all databases and can perform any operation on them.
+The root user can create and delete databases, create and delete other users, grant and revoke privileges from other users, configure server settings, and perform administrative tasks.
+It's recommended to use the root user only for administrative tasks and not for regular application access, as it has broad access to the entire MySQL server.
+
+Remote User:
+A remote user is a regular user account created for accessing MySQL remotely from a different host.
+Remote users have specific privileges granted to them by the MySQL administrator.
+Remote users can have limited access to specific databases or tables based on the privileges granted to them.
+Remote users are typically created for application-specific purposes, allowing applications running on other servers or machines to access the MySQL server.
+Remote users are often restricted to specific IP addresses or ranges from which they are allowed to connect for security purposes.
+
+In summary, while the root user has full administrative control over the MySQL server, including all databases and privileges, remote users are regular users with limited access, typically created for specific application needs and accessed from remote hosts.
+
+ROOT USER SETUP:
+6. To set up the root user, we log into MySQL using the sudo privilege (remember we did not set the password for the remote user when we were installing MySQL) 
+by running the command = "sudo mysql -u root -p" then hit ENTER
+
+7. Now that we are inside MySQL (mysql>), we can then run this command ="ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'new_password';" to set the password for the root user.
+
+8. Once you've set the new password, you need to flush the privileges to apply the changes by running this command = "FLUSH PRIVILEGES;"
+
+9. then you exit mysql by typing "exit;" then log in again to confirm if you can use the new password for the root user.
+
+REMOTE USER SETUP:
+With this user, you should be able to connect to MySQL from any host/workbench running remotely
+
+10. First you log in to MySQL by running this command = "mysql -u root -p" and passing in your password.
+
+11. Then run this command = "CREATE USER 'remote_user'@'remote_ip' IDENTIFIED BY 'password';" to create the user. FOR 'REMOTE USER' input the name of the user, FOR "REMOTE_IP" input "%" if you want to connect from anywhere else input the IP of the machine/host you want to connect from then hit ENTER.
+
+12. TO grant this new remote user privilege, run the command = "GRANT ALL PRIVILEGES ON *.* TO 'remote_user'@'remote_ip';" and this will give the user privileges to access the databases and do other things.
+
+13. Then run the command = "FLUSH PRIVILEGES;" to apply the changes and then exit mysql.
+
+NOW WE HAVE SET THE USERS, SO LET'S CONNECT TO THE MYSQL SERVER USING A MYSQLWORK BENCH RUNNING ON A REMOTE MACHINE.
+
+14. First, we locate the MySQL configuration file by running this command = "sudo find /etc/mysql/ -name '*.cnf'" and then we NANO or VI into the file (/etc/mysql/mysql.conf.d/mysqld.cnf) and change the bind-address to 0.0.0.0 then save and exit the file, this will allow external connection to the mysql 
+
+15. Then we restart mysql by running this command = "sudo systemctl restart mysql"
+
+16. On the MySQL server, we set the security group to allow port 3306 that MySQL is listening on by default by running this command = "sudo ufw allow 3306".
+
+17. Then we open this port in the security group.
+
+18. We can then test if the port is open using this website = "https://portchecker.co/check-it". here you will provide the VM IP address and port 3306
+
+19. On our workbench, we can now connect to the MySQL server using the remote user credentials and giving our connection a name. REMEMBER host is the IP address of the VM MySQL server is running on.
+
+I HOPE THIS IS HELPFULL.
+WRITEN WITH LOVE BY RUBBEN UMUKORO
