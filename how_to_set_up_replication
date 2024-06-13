@@ -1,0 +1,61 @@
+HOW TO SET UP REPLICATION IN MYSQL.
+
+First, set up the master MYSQL server after which, 
+Edit the configuration file. nano or vi into (/etc/mysql/mysql.conf.d/mysqld.cnf)
+then under mysqld, set your server-id  = 1, log_bin = /var/log/mysql/mysql-bin.log, your binlog_do_db = your_database_name as shown bellow 
+
+"[mysqld]
+server-id = 1
+log_bin = /var/log/mysql/mysql-bin.log
+binlog_do_db = your_database_name"
+(Replace your_database_name with the name of the database you want to replicate.)
+
+save the changes and restart mysql to apply the changes.
+
+Now, still on the master server, log in as the root user and create a user for the replication 
+"CREATE USER 'replica_user'@'%' IDENTIFIED BY 'password';
+GRANT REPLICATION SLAVE ON *.* TO 'replica_user'@'%';
+FLUSH PRIVILEGES;"
+Replace replica_user and password with your preferred username and password.
+
+now, Lock the database to get a consistent snapshot by run this command 
+"FLUSH TABLES WITH READ LOCK;"
+
+Get the current binary log file name and position by runing this command 
+"SHOW MASTER STATUS;"
+then Note the values of File and Position.
+
+then create a backup of the database you want to replicate by either using mysql dump =
+"mysqldump -u root -p your_database_name > your_database_name.sql", or using the workbench
+
+After the backup is complete, you can unlock the tables by runing this command 
+"UNLOCK TABLES;"
+
+ON THE REPLICA SERVER.
+set up the replica server and have mysql install on it and it should be running the same version with the master.
+the edit the MySQL configuration file on the replica server "(/etc/mysql/mysql.conf.d/mysqld.cnf or /etc/mysql/my.cnf)" as shown bellow 
+
+"[mysqld]
+server-id = 2
+relay_log = /var/log/mysql/mysql-relay-bin.log"
+save the changes and restart mysql to apply the changes by running "sudo systemctl restert mysql"
+
+then Import the database dump by runing "mysql -u root -p < your_database_name.sql" or you can do that from the workbench if you can already access the server from the workbench.
+
+then Configure the replica to start replication by logging in as the root user and running the follwing command 
+"CHANGE MASTER TO
+  MASTER_HOST='master_ip_address',
+  MASTER_USER='replica_user',
+  MASTER_PASSWORD='password',
+  MASTER_LOG_FILE='master_bin_log_file',
+  MASTER_LOG_POS=master_log_position;"
+
+Replace master_ip_address with the IP address of the master server, replica_user and password with the replication user credentials, and master_bin_log_file and master_log_position with the values obtained from the SHOW MASTER STATUS command.
+
+then start the replication by running "START SLAVE;"
+then check the status of the replication by running SHOW "SLAVE STATUS\G"
+Look for Slave_IO_Running and Slave_SQL_Running. Both should be Yes.
+ 
+ since both servers (master and slave) are running on aws, I will have to set up the security group to allow both servers to reach each other by opening their specific port and tesing if they can actually reach each other by pinging one from the other or telset one from the other or using https://portchecker.co/ to test if the ip addresses and ports can be reached.
+
+ I hope this helps thanks...
